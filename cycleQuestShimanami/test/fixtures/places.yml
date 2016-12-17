@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  uuid: MyString
+  red_count: 1
+  blue_count: 1
+  green_count: 1
+
+two:
+  uuid: MyString
+  red_count: 1
+  blue_count: 1
+  green_count: 1
