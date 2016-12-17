@@ -19,3 +19,12 @@
 
 # Ignore Byebug command history file.
 .byebug_history
+
+# mac finder
+.DS_Store
+
+# Ignore editor file
+/.idea
+
+# Ignore Byebug command history file.
+.byebug_history
