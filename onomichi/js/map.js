@@ -11,7 +11,7 @@ window.onload = function(){
     // testPositionData[0] = new google.maps.LatLng(34.411,133.2035872,15);
     // testPositionData[1] = new google.maps.LatLng(34.412,133.2037672,15);
     // testPositionData[2] = new google.maps.LatLng(34.413,133.2039572,15);//ここのデータをオープンデータから撮ってきたものにする
-    
+
     var testRGBData = [100,10,5];
 
     var teamName = ["red", "blue", "green"];
@@ -80,6 +80,7 @@ function intiMap(){
   return map;
 }
 
+var line;
 //マーカーの設置
 function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, id]...]という形式
   var latlng;
@@ -92,6 +93,31 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
     marker.seeingID = 0;//適当なid
     //設置したマーカーのポップアップを設定
     marker.addListener('click', function(){
+      //現在力合クリックしたマーカーへのルートを表示する
+      var path = [map.getCenter().toUrlValue(), this.getPosition().toUrlValue()];
+      $.get("https://roads.googleapis.com/v1/snapToRoads", {//snapToRoadsメソッドにリクエストを送る
+				interpolate: true,//補間のためにノードを増やす？
+				key:"AIzaSyCuaxH-7F2GKakj-U0GE9s2qKN1y_qhN-g",//APIのキー
+				path: path.join('|'),
+			},function(data) {
+        var snappedNodes = [];//スナップされたノードを格納する latlng型が入る
+        if(line){
+          line.setMap(null);
+        }
+        for (var i = 0; i < data.snappedPoints.length; i++) {
+          var latlng = new google.maps.LatLng(data.snappedPoints[i].location.latitude,data.snappedPoints[i].location.longitude);
+          snappedNodes.push(latlng);
+        }
+        line = new google.maps.Polyline({
+  				map:map,
+  				path:snappedNodes,
+  				clickable : false,
+  				draggable : false,
+  				strokeColor:"#00F",
+  				strokeWeight:2,
+  			});
+			});
+
       var score;
       /*
       //サーバからのデータの取得（動作確認まだ）
@@ -128,15 +154,19 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
 
 
 //位置情報の連続取得＆マップの中心に自分を表示。自分の位置はマーカーで表示する
+var circle;
+var point;
 function startTrackPosition(map){
-  var circle;
   function successed(position){//位置情報取得に成功したとき、その座標をマップの中心にする
-    var position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-    map.panTo(position);
-    if(circle != null)
+    var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+    map.panTo(pos);
+    if(circle){
       circle.setMap(null);
+    }
+    if(point)
+      point.setMap(null);
     circle = new google.maps.Circle({
-      center: position,
+      center: pos,
       map: map,
       fillOpacity: 0.3,
       radius: 100,
@@ -145,7 +175,18 @@ function startTrackPosition(map){
       strokeOpacity: 1,
       strokeWeight: 1,
     });//円を描画
+    point = new google.maps.Circle({
+      center: pos,
+      map: map,
+      fillOpacity: 0.3,
+      radius: 5,
+      strokeColor: "blue",
+      fillColor: "#0000FF",
+      strokeOpacity: 1,
+      strokeWeight: 1,
+    });//中心の円を描画
   }
+
   function failed(){
     alert("位置情報の取得に失敗");
   }
