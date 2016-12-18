@@ -84,10 +84,16 @@ var line;
 //マーカーの設置
 function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, id]...]という形式
   var latlng;
+  var image = {
+    url : "../images/cat.png",
+    scaledSize : new google.maps.Size(36, 36)
+
+  }
   for(latlng of latlngs){
     var marker = new google.maps.Marker({
       position: latlng,
       map: map,
+      icon: image
     });
 
     marker.seeingID = 0;//適当なid
