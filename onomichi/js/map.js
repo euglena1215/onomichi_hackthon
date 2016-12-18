@@ -80,6 +80,7 @@ function intiMap(){
   return map;
 }
 
+var line;
 //マーカーの設置
 function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, id]...]という形式
   var latlng;
@@ -100,9 +101,9 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
 				path: path.join('|'),
 			},function(data) {
         var snappedNodes = [];//スナップされたノードを格納する latlng型が入る
-        var line;
-        if(line != null)
+        if(line){
           line.setMap(null);
+        }
         for (var i = 0; i < data.snappedPoints.length; i++) {
           var latlng = new google.maps.LatLng(data.snappedPoints[i].location.latitude,data.snappedPoints[i].location.longitude);
           snappedNodes.push(latlng);
@@ -153,13 +154,16 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
 
 
 //位置情報の連続取得＆マップの中心に自分を表示。自分の位置はマーカーで表示する
+var circle;
+var point;
 function startTrackPosition(map){
-  var circle;
   function successed(position){//位置情報取得に成功したとき、その座標をマップの中心にする
     var position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-    map.panTo(position);
-    if(circle != null)
+    if(circle){
       circle.setMap(null);
+    }
+    if(point)
+      point.setMap(null);
     circle = new google.maps.Circle({
       center: position,
       map: map,
@@ -170,7 +174,18 @@ function startTrackPosition(map){
       strokeOpacity: 1,
       strokeWeight: 1,
     });//円を描画
+    point = new google.maps.Circle({
+      center: position,
+      map: map,
+      fillOpacity: 0.3,
+      radius: 5,
+      strokeColor: "blue",
+      fillColor: "#0000FF",
+      strokeOpacity: 1,
+      strokeWeight: 1,
+    });//中心の円を描画
   }
+
   function failed(){
     alert("位置情報の取得に失敗");
   }
