@@ -23,6 +23,10 @@ window.onload = function(){
     setMarker(testPositionData, map, teamName);
     startTrackPosition(map);
   });
+
+  // 自チームの表示
+  var val = getUrlVars();
+  viewMyTeam(val["group"]);
 }
 
 
@@ -206,4 +210,42 @@ function startTrackPosition(map){
 function gotoNext(){
   //ここでapi2を叩く
   window.location.href = "gacha.html";
+}
+
+function viewMyTeam(name) {
+  var colors = { red: "#F16868",
+                 blue: "#5B73EE",
+                 green: "#51E56F" };
+  console.log(name);
+  if (name == "red") {
+    console.log("dddddddddd");
+    $("#team-name").html("あかチーム");
+    $("#team-name").css("color", colors["red"]);
+  } else if (name == "blue") {
+    $("#team-name").css("color", colors["blue"]);
+    $("#team-name").html("あおチーム");  
+  } else if (name == "green") {
+    $("#team-name").css("color", colors["green"]);
+    $("#team-name").HTML("みどりチーム");  
+  }
+}
+
+/**
+ * URL解析して、クエリ文字列を返す
+ * @returns {Array} クエリ文字列
+ */
+function getUrlVars()
+{
+    var vars = [], max = 0, hash = "", array = "";
+    var url = window.location.search;
+
+        //?を取り除くため、1から始める。複数のクエリ文字列に対応するため、&で区切る
+    hash  = url.slice(1).split('&');    
+    max = hash.length;
+    for (var i = 0; i < max; i++) {
+        array = hash[i].split('=');    //keyと値に分割。
+        vars[array[0]] = array[1];    //先ほど確保したkeyに、値を代入。
+    }
+
+    return vars;
 }
