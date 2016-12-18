@@ -1,5 +1,4 @@
 var myPos;//自分の座標
-var infowindow;
 
 window.onload = function(){
   var testPositionData = new Array();
@@ -152,14 +151,11 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
 
       cont.push("</span>");
       var contTxt = cont.join("<br>");
-
-      if(infowindow){//infowindowがnullでないなら
-        infowindow.close();
-      }
-      infowindow= new google.maps.InfoWindow({
+      var infowindow= new google.maps.InfoWindow({
         position: this.getPosition(),
         content: contTxt,
       });
+
       infowindow.open(map);
     });
   }
