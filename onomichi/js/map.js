@@ -2,15 +2,16 @@
 
 window.onload = function(){
   var testPositionData = new Array();
-  var coord = new Array();
-  coord = getData().done(function(coord){
-    $.each(coord, function(i, content) {
-      testPositionData[i] = new google.maps.LatLng(content[0], content[1]);
-      console.log("testPosition" + testPositionData[i]);
+  var imgUrl = new Array();
+  var storeName = new Array();
+
+  getData().done(function(json){
+    $.each(json.results.bindings, function(i, val) {
+      val.locate.value = getCoord(val.locate.value);
+      testPositionData[i] = new google.maps.LatLng(val.locate.value[0], val.locate.value[1]); 
+      imgUrl[i] = val.img.value;
+      storeName[i] = val.name.value;
     });
-    // testPositionData[0] = new google.maps.LatLng(34.411,133.2035872,15);
-    // testPositionData[1] = new google.maps.LatLng(34.412,133.2037672,15);
-    // testPositionData[2] = new google.maps.LatLng(34.413,133.2039572,15);//ここのデータをオープンデータから撮ってきたものにする
 
     var testRGBData = [100,10,5];
 
@@ -20,7 +21,7 @@ window.onload = function(){
     console.log("testPositionData" + testPositionData[0]);
     console.log("map" + map);
     console.log("teamName" + teamName);
-    setMarker(testPositionData, map, teamName);
+    setMarker(testPositionData, map, teamName, imgUrl, storeName);
     startTrackPosition(map);
   });
 
@@ -32,43 +33,40 @@ window.onload = function(){
 
 //オープンデータの取得
 function getData(){
-  var coords = new Array();
   var dfd = $.Deferred();
 
   get = $.ajax({
     type: 'GET',
-    url: 'http://sparql.odp.jig.jp/api/v1/sparql?output=csv&force-accept=text%2Fplain&query=select+%3Fo+%7B%0D%0A++%3Fs+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23type%3E+%3Chttp%3A%2F%2Fpurl.org%2Fjrrk%23CivicPOI%3E%3B%0D%0A+++%3Chttp%3A%2F%2Fpurl.org%2Fjrrk%23address%3E+%3Faddress.%0D%0A++filter%28regex%28%3Faddress%2C+%22%E5%BA%83%E5%B3%B6%E7%9C%8C%E5%B0%BE%E9%81%93%E5%B8%82%22%29%29%0D%0A++%3Fs+%3Chttp%3A%2F%2Fodp.jig.jp%2Fodp%2F1.0%23genre%3E+%3Chttp%3A%2F%2Fodp.jig.jp%2Fres%2Fcategory%2F%25E9%25A3%259F%25E3%2581%25B9%25E3%2582%258B%3E.%0D%0A++%3Fs+%3Chttp%3A%2F%2Fimi.ipa.go.jp%2Fns%2Fcore%2Frdf%23%E5%9C%B0%E7%90%86%E5%BA%A7%E6%A8%99%3E+%3Fo.%0D%0A%7Dorder+by+rand%28%29+limit+100'
+    url: 'http://sparql.odp.jig.jp/api/v1/sparql?output=json&force-accept=text%2Fplain&query=select+%3Fid+%3Fimg+%3Fname+%3Flocate+%7B%0D%0A++%3Fs+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23type%3E+%3Chttp%3A%2F%2Fpurl.org%2Fjrrk%23CivicPOI%3E%3B%0D%0A+++%3Chttp%3A%2F%2Fpurl.org%2Fjrrk%23address%3E+%3Faddress.%0D%0A++filter%28regex%28%3Faddress%2C+%22%E5%BA%83%E5%B3%B6%E7%9C%8C%E5%B0%BE%E9%81%93%E5%B8%82%22%29%29%0D%0A++%3Fs+%3Chttp%3A%2F%2Fodp.jig.jp%2Fodp%2F1.0%23genre%3E+%3Chttp%3A%2F%2Fodp.jig.jp%2Fres%2Fcategory%2F%25E9%25A3%259F%25E3%2581%25B9%25E3%2582%258B%3E.%0D%0A++%3Fs+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fidentifier%3E+%3Fid.%0D%0A++%3Fs+%3Fp+%3Fid.%0D%0A++%3Fs+%3Chttp%3A%2F%2Fschema.org%2Fimage%3E+%3Fimg.%0D%0A++%3Fs+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23label%3E+%3Fname.%0D%0A++%3Fs+%3Chttp%3A%2F%2Fimi.ipa.go.jp%2Fns%2Fcore%2Frdf%23%E5%9C%B0%E7%90%86%E5%BA%A7%E6%A8%99%3E+%3Flocate.%0D%0A++filter%28lang%28%3Fname%29+%3D+%22ja%22%29%0D%0A%7Dorder+by+rand%28%29+limit+100'
   });
 
   get.done(function(result) {
-    var splitted = split(result, /\r\n|\r|\n/);
-    var loc = new Array();
-    var coord = new Array();
-    splitted.shift();
-    $.each(splitted, function(i, content) {
-      loc.push(split(content, /^http:\/\/odp.jig.jp\/res\/geopoint\//));
-      loc[i].shift();
-    });
-    $.each(loc, function(i, content) {
-      coord.push(split(content + '', /\//));
-    });
-    $.each(coord, function(i, val) {
-      console.log(i + ': ' + val);
-    });
-    coord.pop();
-    coords = coord;
-    return dfd.resolve(coords);
-  }).fail(function(result) {
-    console.log("Failured");
-  }
+      var json = JSON.parse(result);
+      // $.each(json.results.bindings, function(i, val) {
+      //   console.log(val.id.value);
+      //   console.log(val.img.value);
+      //   val.locate.value = getCoord(val.locate.value);
+      //   console.log(val.locate.value);
+      //   console.log(val.name.value);        
+      // });
+      return dfd.resolve(json);
+    }).fail(function(result) {
+      console.log("Failured")
+    }
   );
 
-  console.log("!!!!!HERE!!!!!!!!!" + coords);
   return dfd.promise();
 }
 
 function split(str, regexp) {
   return str.split(regexp);
+}
+
+function getCoord(locate) {
+  var splitted = locate.split(/\//);
+  splitted.splice(0, 5);
+  splitted.pop();
+  return splitted;
 }
 
 //地図表示　マップを返す
@@ -86,14 +84,16 @@ function intiMap(){
 
 var line;
 //マーカーの設置
-function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, id]...]という形式
+function setMarker(latlngs, map, teamName, imgUrl, storeName){//latlngsは[[latlng, id], [latlng, id]...]という形式
   var latlng;
   var image = {
     url : "../images/cat.png",
     scaledSize : new google.maps.Size(36, 36)
 
   }
-  for(latlng of latlngs){
+
+  // for(latlng of latlngs){
+  $.each(latlngs, function(i, latlng) {
     var marker = new google.maps.Marker({
       position: latlng,
       map: map,
@@ -141,7 +141,7 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
       var cont = [];//ポップアップの内容
       cont.push('<span id="info">Score');
       for(var i=0;i<3;i++){
-        cont.push(teamName[i] + '<span class="score"> ' + score[i] + "</span><br>");
+        cont.push(teamName[i] + '<span class="score"> ' + score[i] + "</span>");
       }
 
       var distance = google.maps.geometry.spherical.computeDistanceBetween(map.getCenter(), this.getPosition());
@@ -150,6 +150,7 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
       }
 
       cont.push("</span>");
+      cont.push("<span id=\""i"\">");
       var contTxt = cont.join("<br>");
       var infowindow= new google.maps.InfoWindow({
         position: this.getPosition(),
@@ -159,10 +160,15 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
 
       infowindow.open(map);
     });
-  }
+  });
+
+  insertInfo(imgUrl, storeName);
 }
 
+function insertInfo(imgs, names) {
+  getElementById("info");
 
+}
 
 //位置情報の連続取得＆マップの中心に自分を表示。自分の位置はマーカーで表示する
 var circle;
