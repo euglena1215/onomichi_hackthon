@@ -69,9 +69,9 @@ function split(str, regexp) {
 
 //地図表示　マップを返す
 function intiMap(){
-  var preLatlng = new google.maps.LatLng(34.413433,133.2037672,15);//鯖江の緯度経度
+  var preLatlng = new google.maps.LatLng(34.408699,133.2037253, 18.19);//尾道市役所の緯度経度
   var mapOptions = {
-    zoom: 15,
+    zoom: 18,
     center: preLatlng,
     mapTypeControl: false,
     streetViewControl: false,
