@@ -158,14 +158,15 @@ var circle;
 var point;
 function startTrackPosition(map){
   function successed(position){//位置情報取得に成功したとき、その座標をマップの中心にする
-    var position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+    var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+    map.panTo(pos);
     if(circle){
       circle.setMap(null);
     }
     if(point)
       point.setMap(null);
     circle = new google.maps.Circle({
-      center: position,
+      center: pos,
       map: map,
       fillOpacity: 0.3,
       radius: 100,
@@ -175,7 +176,7 @@ function startTrackPosition(map){
       strokeWeight: 1,
     });//円を描画
     point = new google.maps.Circle({
-      center: position,
+      center: pos,
       map: map,
       fillOpacity: 0.3,
       radius: 5,
