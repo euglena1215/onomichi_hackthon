@@ -90,7 +90,7 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
   var latlng;
   var image = {
     url : "../images/cat.png",
-    scaledSize : new google.maps.Size(36, 36)
+    scaledSize : new google.maps.Size(40 + map.getZoom(), 40 + map.getZoom()),
 
   }
   for(latlng of latlngs){
@@ -223,10 +223,10 @@ function viewMyTeam(name) {
     $("#team-name").css("color", colors["red"]);
   } else if (name == "blue") {
     $("#team-name").css("color", colors["blue"]);
-    $("#team-name").html("あおチーム");  
+    $("#team-name").html("あおチーム");
   } else if (name == "green") {
     $("#team-name").css("color", colors["green"]);
-    $("#team-name").HTML("みどりチーム");  
+    $("#team-name").HTML("みどりチーム");
   }
 }
 
@@ -240,7 +240,7 @@ function getUrlVars()
     var url = window.location.search;
 
         //?を取り除くため、1から始める。複数のクエリ文字列に対応するため、&で区切る
-    hash  = url.slice(1).split('&');    
+    hash  = url.slice(1).split('&');
     max = hash.length;
     for (var i = 0; i < max; i++) {
         array = hash[i].split('=');    //keyと値に分割。
