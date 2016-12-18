@@ -145,6 +145,7 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
         position: this.getPosition(),
         content: contTxt,
       });
+      removeInfo();
 
       infowindow.open(map);
     });
@@ -201,4 +202,11 @@ function startTrackPosition(map){
 function gotoNext(){
   //ここでapi2を叩く
   window.location.href = "gacha.html";
+}
+
+function removeInfo() {
+  var element = document.getElementById("info");
+  if (element) {
+    element.parentNode.parentNode.parentNode.parentNode.remove();
+  }
 }
