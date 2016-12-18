@@ -11,7 +11,7 @@ window.onload = function(){
     // testPositionData[0] = new google.maps.LatLng(34.411,133.2035872,15);
     // testPositionData[1] = new google.maps.LatLng(34.412,133.2037672,15);
     // testPositionData[2] = new google.maps.LatLng(34.413,133.2039572,15);//ここのデータをオープンデータから撮ってきたものにする
-    
+
     var testRGBData = [100,10,5];
 
     var teamName = ["red", "blue", "green"];
@@ -92,6 +92,31 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
     marker.seeingID = 0;//適当なid
     //設置したマーカーのポップアップを設定
     marker.addListener('click', function(){
+      //現在力合クリックしたマーカーへのルートを表示する
+      var path = [map.getCenter().toUrlValue(), this.getPosition().toUrlValue()];
+      $.get("https://roads.googleapis.com/v1/snapToRoads", {//snapToRoadsメソッドにリクエストを送る
+				interpolate: true,//補間のためにノードを増やす？
+				key:"AIzaSyCuaxH-7F2GKakj-U0GE9s2qKN1y_qhN-g",//APIのキー
+				path: path.join('|'),
+			},function(data) {
+        var snappedNodes = [];//スナップされたノードを格納する latlng型が入る
+        var line;
+        if(line != null)
+          line.setMap(null);
+        for (var i = 0; i < data.snappedPoints.length; i++) {
+          var latlng = new google.maps.LatLng(data.snappedPoints[i].location.latitude,data.snappedPoints[i].location.longitude);
+          snappedNodes.push(latlng);
+        }
+        line = new google.maps.Polyline({
+  				map:map,
+  				path:snappedNodes,
+  				clickable : false,
+  				draggable : false,
+  				strokeColor:"#00F",
+  				strokeWeight:2,
+  			});
+			});
+
       var score;
       /*
       //サーバからのデータの取得（動作確認まだ）
