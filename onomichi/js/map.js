@@ -1,4 +1,4 @@
-
+var myPos;//自分の座標
 
 window.onload = function(){
   var testPositionData = new Array();
@@ -90,7 +90,7 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
   var latlng;
   var image = {
     url : "../images/cat.png",
-    scaledSize : new google.maps.Size(36, 36)
+    scaledSize : new google.maps.Size(40 + map.getZoom(), 40 + map.getZoom()),
 
   }
   for(latlng of latlngs){
@@ -104,7 +104,7 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
     //設置したマーカーのポップアップを設定
     marker.addListener('click', function(){
       //現在力合クリックしたマーカーへのルートを表示する
-      var path = [map.getCenter().toUrlValue(), this.getPosition().toUrlValue()];
+      var path = [myPos.toUrlValue(), this.getPosition().toUrlValue()];
       $.get("https://roads.googleapis.com/v1/snapToRoads", {//snapToRoadsメソッドにリクエストを送る
 				interpolate: true,//補間のためにノードを増やす？
 				key:"AIzaSyCuaxH-7F2GKakj-U0GE9s2qKN1y_qhN-g",//APIのキー
@@ -144,7 +144,7 @@ function setMarker(latlngs, map, teamName){//latlngsは[[latlng, id], [latlng, i
         cont.push(teamName[i] + '<span class="score"> ' + score[i] + "</span><br>");
       }
 
-      var distance = google.maps.geometry.spherical.computeDistanceBetween(map.getCenter(), this.getPosition());
+      var distance = google.maps.geometry.spherical.computeDistanceBetween(myPos, this.getPosition());
       if(distance < 100){//距離が一定以下ならアクセスボタンが出るようにする
         cont.push('<button type="button" class="btn btn-primary" onclick = "gotoNext()">アクセス可能</button>');
       }
@@ -169,15 +169,14 @@ var circle;
 var point;
 function startTrackPosition(map){
   function successed(position){//位置情報取得に成功したとき、その座標をマップの中心にする
-    var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-    map.panTo(pos);
+    myPos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
     if(circle){
       circle.setMap(null);
     }
     if(point)
       point.setMap(null);
     circle = new google.maps.Circle({
-      center: pos,
+      center: myPos,
       map: map,
       fillOpacity: 0.3,
       radius: 100,
@@ -187,7 +186,7 @@ function startTrackPosition(map){
       strokeWeight: 1,
     });//円を描画
     point = new google.maps.Circle({
-      center: pos,
+      center: myPos,
       map: map,
       fillOpacity: 0.3,
       radius: 5,
@@ -232,10 +231,10 @@ function viewMyTeam(name) {
     $("#team-name").css("color", colors["red"]);
   } else if (name == "blue") {
     $("#team-name").css("color", colors["blue"]);
-    $("#team-name").html("あおチーム");  
+    $("#team-name").html("あおチーム");
   } else if (name == "green") {
     $("#team-name").css("color", colors["green"]);
-    $("#team-name").HTML("みどりチーム");  
+    $("#team-name").HTML("みどりチーム");
   }
 }
 
@@ -249,7 +248,7 @@ function getUrlVars()
     var url = window.location.search;
 
         //?を取り除くため、1から始める。複数のクエリ文字列に対応するため、&で区切る
-    hash  = url.slice(1).split('&');    
+    hash  = url.slice(1).split('&');
     max = hash.length;
     for (var i = 0; i < max; i++) {
         array = hash[i].split('=');    //keyと値に分割。
